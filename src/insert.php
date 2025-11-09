@@ -1,12 +1,12 @@
 <?php
     //Qui la parte di inserimento nel DB degli utenti
+    $servername = 'db';
+    $username = 'myuser';
+    $password = 'mypassword';
+    $database = 'myapp_db';
 
     //1. Connessione a MYSQL + gestione degli eventuali errori
     if($_SERVER['REQUEST_METHOD'] == "POST"){
-        $servername = 'db';
-        $username = 'myuser';
-        $password = 'mypassword';
-        $database = 'myapp_db';
 
         $conn = new mysqli($servername, $username, $password, $database);
 
@@ -50,12 +50,12 @@
             <label>Inserisci nome e cognome</label>
             <input type="text" name="name">
             <label for="email">Inserisci email</label>
-            <input type="text" name="email">
+            <input type="email" name="email">
             <input type="submit" value="Inserisci">
          </form>
     </div>
     
-    //visualizza utenti
+    <!-- visualizza utenti -->
     <div id="users">
         <?php
             $conn = new mysqli($servername, $username, $password, $database);
@@ -64,20 +64,21 @@
                 die("Connessione fallita: " . $conn->connect_error);
             }// else -> connessione riuscita
 
-            $q = "SELECT * from utenti";
-            echo $q;
+            $q = "SELECT * FROM utenti";
+            echo $q . "<br>";
 
-            $results = $conn -> query($q);
+            $results = $conn->query($q);
 
-            $row = $results -> fetch_array(MYSQLI_ASSOC);
-            print_r($row);
-            echo "<br />";
-            $row = $results -> fetch_array(MYSQLI_ASSOC);
-            print_r($row);
-            echo "<br />";
-            $row = $results -> fetch_array(MYSQLI_ASSOC);
-            print_r($row);
-            echo "<br />";
+            if ($results && $results->num_rows > 0) {
+                while ($row = $results->fetch_array(MYSQLI_ASSOC)) {
+                    print_r($row);
+                    echo "<br />";
+                }
+            } else {
+                echo "Nessun utente trovato.";
+            }
+
+            $conn->close();
         ?>
     </div>
 </body>
