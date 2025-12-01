@@ -1,94 +1,123 @@
 <?php
-    // Config DB
-    $servername = 'db';
-    $username   = 'myuser';
-    $password   = 'mypassword';
-    $database   = 'myapp_db';
+include_once("index.php");
 
-    // Connessione
-    $conn = new mysqli($servername, $username, $password, $database);
-    if ($conn->connect_error) {
-        die("Connessione fallita: " . $conn->connect_error);
-    }
+// =========================
+// DELETE
+// =========================
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete_id"])) {
+    $id = $_POST["delete_id"];
+    $conn->query("DELETE FROM utenti WHERE id = $id");
+}
 
-    // --- ELIMINAZIONE ---
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete_id"])){
+// =========================
+// UPDATE
+// =========================
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_id"])) {
+    $id = $_POST["update_id"];
+    $nome = $_POST["edit_nome"];
+    $email = $_POST["edit_email"];
 
-        $id = $_POST["delete_id"];
-        $q = "DELETE FROM utenti WHERE id = $id";
-        $conn->query($q);
-    }
-
-    // --- INSERIMENTO ---
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["name"]) && isset($_POST["email"]) && !isset($_POST["delete_id"])) {
-
-        $nome  = $_POST["name"];
-        $email = $_POST["email"];
-
-        $q = "INSERT INTO utenti (nome, email) VALUES ('$nome', '$email')";
-        $conn->query($q);
-    }
-
+    $conn->query("UPDATE utenti SET nome = '$nome', email = '$email' WHERE id = $id");
+}
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Gestione utenti</title>
+    <title>Gestione Utenti</title>
+
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td, th {
+            padding: 6px;
+        }
+
+        .edit-form input {
+            width: 95%;
+        }
+
+        button {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
-    <h2>Inserisci Utente</h2>
-    <form action="" method="post">
-        <label>Nome:</label>
-        <input type="text" name="name">
+<h2>Elenco utenti</h2>
 
-        <label>Email:</label>
-        <input type="email" name="email">
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Azioni</th>
+    </tr>
 
-        <input type="submit" value="Inserisci">
-    </form>
+    <?php
+        foreach ($utenti as $row) {
+    ?>
 
-    <hr>
+    <!-- VISUALIZZAZIONE -->
+    <tr id="row-<?= $row['id'] ?>">
+        <td><?= $row["id"] ?></td>
+        <td><?= $row["nome"] ?></td>
+        <td><?= $row["email"] ?></td>
+        <td>
+            <button class="editBtn" data-target="<?= $row['id'] ?>">
+                Modifica
+            </button>
 
-    <h2>Elenco utenti</h2>
+            <form method="post" action="">
+                <input type="hidden" name="delete_id" value="<?= $row['id'] ?>">
+                <input type="submit" value="Elimina">
+            </form>
+        </td>
+    </tr>
 
-    <table border="1" cellpadding="6">
-        <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Azione</th>
-        </tr>
+    <!-- MODIFICA -->
+    <tr id="edit-<?= $row['id'] ?>" class="hidden edit-form">
+        <form method="post" action="">
+            <input type="hidden" name="update_id" value="<?= $row['id'] ?>">
 
-        <?php
-            //query tabella utenti
-            $q = "SELECT * FROM utenti";
-            $results = $conn->query($q);
+            <td><?= $row["id"] ?></td>
+            <td>
+                <input type="text" name="edit_nome" value="<?= $row["nome"] ?>">
+            </td>
+            <td>
+                <input type="email" name="edit_email" value="<?= $row["email"] ?>">
+            </td>
+            <td>
+                <input type="submit" value="Salva">
+            </td>
+        </form>
+    </tr>
+    <?php
+        }
+    ?>
+</table>
 
-            if ($results && $results->num_rows > 0) {
-                while ($row = $results->fetch_assoc()) {
-        ?>
-                    <tr>
-                        <td><?= $row["id"] ?></td>
-                        <td><?= $row["nome"] ?></td>
-                        <td><?= $row["email"] ?></td>
-                        <td>
-                            <form method="post" action="">
-                                <input type="hidden" name="delete_id" value="<?= $row["id"] ?>">
-                                <input type="submit" value="Elimina">
-                            </form>
-                        </td>
-                    </tr>
-        <?php
-                }
-            } else {
-                echo "<tr><td>Nessun utente presente.</td></tr>";
-            }
+<script>
+    let buttons = document.querySelectorAll(".editBtn");
 
-            $conn->close();
-        ?>
-    </table>
+    buttons.forEach(function(element, index, array) {
+        element.addEventListener("click", function() {
+            let id = element.dataset.target;
+            document.getElementById("row-" + id).classList.add("hidden");
+            document.getElementById("edit-" + id).classList.remove("hidden");
+        });
+    });
+</script>
 
 </body>
 </html>
+
+<?php
+$conn->close();
+?>
