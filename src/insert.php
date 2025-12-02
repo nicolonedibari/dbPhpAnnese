@@ -1,24 +1,31 @@
 <?php
-include_once("index.php");
+    include_once("index.php");
 
-// =========================
-// DELETE
-// =========================
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete_id"])) {
-    $id = $_POST["delete_id"];
-    $conn->query("DELETE FROM utenti WHERE id = $id");
-}
+    // inserire
+    if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["add_user"])) {
+        $nome = $_POST["nome"];
+        $email = $_POST["email"];
 
-// =========================
-// UPDATE
-// =========================
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_id"])) {
-    $id = $_POST["update_id"];
-    $nome = $_POST["edit_nome"];
-    $email = $_POST["edit_email"];
+        $conn->query("INSERT INTO utenti (nome, email) VALUES ('$nome', '$email')");
+    }
 
-    $conn->query("UPDATE utenti SET nome = '$nome', email = '$email' WHERE id = $id");
-}
+    // cancellare
+    if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete_id"])) {
+        $id = $_POST["delete_id"];
+        $conn->query("DELETE FROM utenti WHERE id = $id");
+    }
+
+    // modificare
+    if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_id"])) {
+        $id = $_POST["update_id"];
+        $nome = $_POST["edit_nome"];
+        $email = $_POST["edit_email"];
+
+        $conn->query("UPDATE utenti SET nome = '$nome', email = '$email' WHERE id = $id");
+    }
+
+    // leggi
+    $utenti = get_users();
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -39,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_id"])) {
             padding: 6px;
         }
 
-        .edit-form input {
+       .edit-form input {
             width: 95%;
         }
 
@@ -49,6 +56,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_id"])) {
     </style>
 </head>
 <body>
+
+<h2>Inserisci nuovo utente</h2>
+
+<!-- inserire -->
+<form method="post" action="">
+    <input type="text" name="nome" placeholder="Nome" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="submit" name="add_user" value="Inserisci">
+</form>
 
 <h2>Elenco utenti</h2>
 
@@ -60,9 +76,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_id"])) {
         <th>Azioni</th>
     </tr>
 
-    <?php
-        foreach ($utenti as $row) {
-    ?>
+<?php 
+    foreach ($utenti as $row) {
+?>
 
     <!-- VISUALIZZAZIONE -->
     <tr id="row-<?= $row['id'] ?>">
@@ -98,17 +114,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_id"])) {
             </td>
         </form>
     </tr>
-    <?php
-        }
-    ?>
+
+<?php 
+    } 
+?>
+
 </table>
 
 <script>
     let buttons = document.querySelectorAll(".editBtn");
 
     buttons.forEach(function(element, index, array) {
-        element.addEventListener("click", function() {
+        element.addEventListener("click", function () {
             let id = element.dataset.target;
+
             document.getElementById("row-" + id).classList.add("hidden");
             document.getElementById("edit-" + id).classList.remove("hidden");
         });
@@ -119,5 +138,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_id"])) {
 </html>
 
 <?php
-$conn->close();
+    $conn->close();
 ?>

@@ -11,14 +11,16 @@ if ($conn->connect_error) {
     die("Connessione fallita");
 }
 
-// QUERY
-$query = "SELECT * FROM utenti";
-$result = $conn->query($query);
+function get_users ($read_query = "SELECT * FROM utenti;"){
+    global $conn;
+    $results = $conn->query($read_query);
 
-// ARRAY CON TUTTI GLI UTENTI
-$utenti = [];
+    $array = [];
 
-foreach ($result as $row) {
-    $utenti[] = $row;
+    while ($row = $results->fetch_array()) {
+        array_push($array, $row);
+    }
+
+    return $array;
 }
 ?>
